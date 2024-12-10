@@ -1,0 +1,97 @@
+-- Services
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Set Skybox to Sky Blue
+local function setSkyBlue()
+    local sky = Instance.new("Sky")
+    sky.SkyboxBk = "rbxassetid://140482148"  -- Background sky texture (blue sky)
+    sky.SkyboxDn = "rbxassetid://140482148"  -- Bottom sky texture
+    sky.SkyboxFt = "rbxassetid://140482148"  -- Front sky texture
+    sky.SkyboxLf = "rbxassetid://140482148"  -- Left sky texture
+    sky.SkyboxRt = "rbxassetid://140482148"  -- Right sky texture
+    sky.SkyboxUp = "rbxassetid://140482148"  -- Top sky texture
+    sky.Parent = Lighting
+end
+
+-- Create ParticleEmitter for vibrant sparkles with extended range
+local function createSparkles()
+    local sparkle = Instance.new("ParticleEmitter")
+    sparkle.Parent = Camera
+    sparkle.Texture = "rbxassetid://131950446"  -- Sparkle texture ID (you can change it)
+    sparkle.Rate = 100  -- Higher rate for more frequent particles
+    sparkle.Lifetime = NumberRange.new(1, 4)  -- Longer lifetime for sparkles
+    sparkle.Size = NumberSequence.new(1, 3)  -- Larger sparkle size for more noticeable effect
+    sparkle.Speed = NumberRange.new(10, 30)  -- Faster particles for dynamic movement
+    sparkle.SpreadAngle = Vector2.new(0, 360)  -- Spread angle of particles
+    sparkle.EmissionDirection = Enum.NormalId.Front  -- Particles will emit from the front
+    sparkle.Rotation = NumberRange.new(0, 360)  -- Random rotation for each particle
+    sparkle.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),  -- Red
+        ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),  -- Green
+        ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),  -- Blue
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))  -- Yellow
+    })  -- Vibrant colors for the sparkles
+end
+
+-- Add glowing effect to the character with vibrant colors
+local function addCharacterGlow()
+    local character = player.Character or player.CharacterAdded:Wait()
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            -- Add Glow to each part with random vibrant colors
+            local glow = Instance.new("PointLight")
+            glow.Parent = part
+            glow.Range = 50  -- Larger range for glow effect
+            glow.Brightness = 5  -- High brightness for intense effect
+            glow.Color = Color3.fromRGB(math.random(150, 255), math.random(100, 255), math.random(100, 255))  -- Random vibrant colors
+        end
+    end
+end
+
+-- Apply Vibrant Color and Texture Effect, making the world colorful but not overwhelming
+local function applyVibrantEffect()
+    -- Adjust ColorCorrection for vibrant color saturation
+    local colorCorrection = Instance.new("ColorCorrectionEffect")
+    colorCorrection.Parent = Camera
+    colorCorrection.Saturation = 2  -- Increase saturation for more vibrant colors
+    colorCorrection.Contrast = 1.5   -- Increased contrast for more intensity
+    colorCorrection.Brightness = 1.5  -- Slightly brighter visuals for dynamic effect
+
+    -- Bloom Effect (Glow)
+    local bloom = Instance.new("BloomEffect")
+    bloom.Parent = Camera
+    bloom.Intensity = 2  -- Medium glow intensity
+    bloom.Threshold = 0.5  -- Lower threshold for strong glowing parts
+
+    -- Lens Distortion for trippy feel (adjusted intensity)
+    local lensDistortion = Instance.new("LensDistortionEffect")
+    lensDistortion.Parent = Camera
+    lensDistortion.Intensity = 0.4  -- Adjusted for a noticeable but not overwhelming effect
+
+    -- Modify Ambient Lighting to make it vibrant and colorful (removed white)
+    Lighting.Ambient = Color3.fromRGB(100, 0, 255)  -- Purple to replace white and enhance vibrancy
+    Lighting.OutdoorAmbient = Color3.fromRGB(100, 0, 255)  -- Matching outdoor ambient lighting (purple)
+
+    -- Extend Fog with vibrant colors to create colorful haze without overpowering textures (no white)
+    Lighting.FogColor = Color3.fromRGB(255, 105, 180)  -- Hot pink fog instead of white
+    Lighting.FogStart = 5  -- Fog starts closer to the player for a gradual effect
+    Lighting.FogEnd = 300  -- Shorter fog range to keep the textures more visible
+
+    -- Create Sparkles around the player with vibrant colors
+    createSparkles()
+
+    -- Add glow effect to character to enhance visual detail
+    addCharacterGlow()
+end
+
+-- Main loop to apply effect continuously
+RunService.RenderStepped:Connect(function()
+    applyVibrantEffect()
+end)
+
+-- Set the sky to a sky-blue color when the game starts
+setSkyBlue()
